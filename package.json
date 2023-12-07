@@ -1,6 +1,6 @@
 {
   "urls": [
-    ["config.py", "github:lipic/rs485_tcp_converter/main/__config__.py"],
+    ["__config__.py", "github:lipic/rs485_tcp_converter/main/__config__.py"],
     ["task_handler.py", "github:lipic/rs485_tcp_converter/main/task_handler.py"],
     ["web_server_app.py", "github:lipic/rs485_tcp_converter/main/web_server_app.py"],
     ["modbus_tcp.py", "github:lipic/rs485_tcp_converter/main/modbus_tcp.py"],
