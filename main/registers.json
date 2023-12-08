@@ -1,0 +1,40 @@
+{
+    "HREGS": {
+        "U1_HREGS": {
+            "register": 0,
+            "len": 1
+        },
+        "U2_HREGS": {
+            "register": 1,
+            "len": 1
+        },
+        "U3_HREGS": {
+            "register": 2,
+            "len": 1
+        },
+        "I1_HREGS": {
+            "register": 3,
+            "len": 1
+        },
+        "I2_HREGS": {
+            "register": 4,
+            "len": 1
+        },
+        "I3_HREGS": {
+            "register": 5,
+            "len": 1
+        },
+        "P1_HREGS": {
+            "register": 6,
+            "len": 1
+        },
+        "P2_HREGS": {
+            "register": 7,
+            "len": 1
+        },
+        "P3_HREGS": {
+            "register": 8,
+            "len": 1
+        }
+    }
+}

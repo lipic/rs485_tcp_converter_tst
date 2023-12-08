@@ -9,15 +9,16 @@ class Config:
         self.boot = bootloader.Bootloader('https://github.com/lipic/bcbox_tst', "")
         self.setting_profiles: str = 'setting.dat'
         self.config = OrderedDict()
-        self.config['reset'] = '0'
-        self.config['automatic_update'] = '1'
-        self.config['actual_sw_version'] = '0'
-        self.config['testing_software'] = '0'
-        self.config['errors'] = '0'
-        self.config['id'] = '0'
-        self.config['wi-fi_ap'] = '0'
-        self.config['factory_reset'] = '0'
-        self.config['wifi_status'] = '0'
+        self.config['reset']: str = '0'
+        self.config['automatic_update']: str = '1'
+        self.config['actual_sw_version']: str = '0'
+        self.config['testing_software']: str = '0'
+        self.config['errors']: str = '0'
+        self.config['id']: str = '0'
+        self.config['factory_reset']: str = '0'
+        self.config['wifi_status']: str = '0'
+        self.config['inverter_type']: str = '0'
+        self.loading_wifi: bool = False
         self.handle_configure('actual_sw_version', self.boot.get_version(""))
         self.get_config()
 
@@ -29,7 +30,6 @@ class Config:
         self.config['testing_software'] = '0'
         self.config['errors'] = '0'
         self.config['id'] = '0'
-        self.config['wi-fi_ap'] = '0'
         self.config['factory_reset'] = '0'
         self.config['wifi_status'] = '0'
         self.handle_configure('actual_sw_version', self.boot.get_version(""))

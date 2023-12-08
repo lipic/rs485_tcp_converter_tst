@@ -41,6 +41,7 @@ class WebServerApp:
         self.wifi_manager = wifi
         self.ip_address: str = ''
         self.port: int = 80
+        self.ssid_client: dict = dict()
         self.datalayer = dict()
 
         self.logger = ulogging.getLogger("WebServerApp")
@@ -81,42 +82,50 @@ class WebServerApp:
     def web_redirect(self, req, resp):
         self.setting.loading_wifi = True
         target_ip = '192.168.4.1'
-        target_port = '8000'
+        target_port = '80'
         target_url = 'http://' + target_ip + ':' + target_port
         headers = {"Location": target_url}
         yield from picoweb.start_response(resp, status="302", headers=headers)
     def main(self, req, resp):
         collect()
-        self.setting.loading_wifi = True
         yield from picoweb.start_response(resp)
         yield from self.app.render_template(resp, "main.html")
 
     def load_wifi_ssid(self, req, resp):
-        self.setting.loading_wifi = True
-        client = self.wifi_manager.getSSID()
-        datalayer = {}
-        for i in client:
-            if client[i] > -86:
-                datalayer[i] = client[i]
-        datalayer["connectSSID"] = self.wifi_manager.getCurrentConnectSSID()
-        yield from picoweb.start_response(resp, "application/json")
-        yield from resp.awrite(json.dumps(datalayer))
+        if self.wifi_manager.is_connected() and req.method == "GET":
+            print("-----------")
+            self.ssid_client["connectSSID"] = self.wifi_manager.getCurrentConnectSSID()
+            yield from picoweb.start_response(resp, "application/json")
+            yield from resp.awrite(json.dumps(self.ssid_client))
+        else:
+            print("++++++++++++")
+            self.setting.loading_wifi = True
+            self.ssid_client.clear()
+            client = self.wifi_manager.getSSID()
+            for i in client:
+                if client[i] > -86:
+                    self.ssid_client[i] = client[i]
+            self.ssid_client["connectSSID"] = self.wifi_manager.getCurrentConnectSSID()
+            print(self.ssid_client)
+            yield from picoweb.start_response(resp, "application/json")
+            yield from resp.awrite(json.dumps(self.ssid_client))
 
     def update_wifi(self, req, resp):
         collect()
         size = int(req.headers[b"Content-Length"])
         qs = yield from req.reader.read(size)
         req.qs = qs.decode()
+        data_layer: dict = {}
         try:
             i = json.loads(req.qs)
+            data_layer = await self.wifi_manager.handle_configure(i["ssid"], i["password"])
         except:
             pass
-        datalayer = await self.wifi_manager.handle_configure(i["ssid"], i["password"])
-        self.ip_address = self.wifi_manager.getIp()
-        datalayer = {"process": datalayer, "ip": self.ip_address}
+        self.ip_address = self.wifi_manager.get_ip()
+        data_layer = {"process": data_layer, "ip": self.ip_address}
 
         yield from picoweb.start_response(resp, "application/json")
-        yield from resp.awrite(json.dumps(datalayer))
+        yield from resp.awrite(json.dumps(data_layer))
         asyncio.create_task(self.reset_task())
 
     async def reset_task(self):
@@ -149,14 +158,14 @@ class WebServerApp:
         return req
 
     def get_esp_id(self, req, resp):
-        datalayer = {"ID": " BCBOX: {}".format(self.setting.config['ID']), "IP": self.wifi_manager.getIp()}
+        datalayer = {"ID": " VC: {}".format(self.setting.config['id']), "IP": self.wifi_manager.get_ip()}
         yield from picoweb.start_response(resp, "application/json")
         yield from resp.awrite(json.dumps(datalayer))
 
     async def web_server_run(self):
         try:
             self.logger.info("Webserver app started")
-            self.app.run(debug=False, host=SERVER_IP, port=self.port)
+            self.app.run(debug=False, host='0.0.0.0', port=self.port)
             while True:
                 await asyncio.sleep(100)
         except Exception as e:
@@ -175,8 +184,6 @@ class WebServerApp:
                 data, addr = udps.recvfrom(4096)
                 DNS = DNSQuery(data)
                 udps.sendto(DNS.response(SERVER_IP), addr)
-                self.wifi_manager.wlan_sta.disconnect()
-                self.setting.loading_wifi = True
                 await asyncio.sleep_ms(100)
             except Exception as e:
                 await asyncio.sleep_ms(3000)

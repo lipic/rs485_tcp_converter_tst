@@ -5,6 +5,8 @@ from collections import OrderedDict
 from machine import Pin, WDT
 from main import web_server_app
 from main.__config__ import Config
+from main.modbus_tcp import ModbusTCPServer
+from main.modbus_rtu import ModbusRTUServer
 import ulogging
 
 LED_WIFI_HANDLER_ERR: int = 1
@@ -17,12 +19,13 @@ class TaskHandler:
         self.wdt: WDT = WDT(timeout=60000)
         self.setting: OrderedDict = Config()
         self.web_server_app = web_server_app.WebServerApp(wifi=wifi, setting=self.setting, debug=int(self.setting.config['testing_software']))
-        self.wifi_manager = wifi
         self.led_error_handler: LedHandler = LedHandler(21, 1, 2, 40)
         self.led_wifi_handler: LedHandler = LedHandler(22, 1, 2, 20)
-        self.wifi_manager.turnONAp()
+        self.modbus_tcp: ModbusTCPServer = ModbusTCPServer(debug=bool(self.setting.config['testing_software']))
+        self.modbus_rtu: ModbusRTUServer = ModbusRTUServer(baudrate=9600, debug=bool(self.setting.config['testing_software']))
+        self.wifi_manager = wifi
         self.number_of_connection_attempts: int = 0
-
+        self.wifi_manager.turnONAp()
         self.logger = ulogging.getLogger(__name__)
         if int(self.setting.config['testing_software']) == 1:
             self.logger.setLevel(ulogging.DEBUG)
@@ -85,5 +88,7 @@ class TaskHandler:
         loop.create_task(self.led_error())
         loop.create_task(self.led_wifi())
         loop.create_task(self.web_server_app.web_server_run())
-        # loop.create_task(self.web_server_app.run_dns_server())
+        loop.create_task(self.web_server_app.run_dns_server())
+        loop.create_task(self.modbus_tcp.run())
+        loop.create_task(self.modbus_rtu.run())
         loop.run_forever()
