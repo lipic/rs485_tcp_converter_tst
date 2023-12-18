@@ -1,6 +1,6 @@
 import uasyncio as asyncio
 import ulogging
-from serial import Serial
+from umodbus.serial import Serial
 
 
 class ModbusRTUServer:
@@ -28,4 +28,4 @@ class ModbusRTUServer:
                 print(resp)
             except Exception as e:
                 self.logger.debug(e)
-            await asyncio.sleep(1)
+            await asyncio.sleep(2)

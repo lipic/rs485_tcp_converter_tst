@@ -89,6 +89,6 @@ class TaskHandler:
         loop.create_task(self.led_wifi())
         loop.create_task(self.web_server_app.web_server_run())
         loop.create_task(self.web_server_app.run_dns_server())
-        loop.create_task(self.modbus_tcp.run())
-        loop.create_task(self.modbus_rtu.run())
+        #loop.create_task(self.modbus_tcp.run())
+        #loop.create_task(self.modbus_rtu.run())
         loop.run_forever()

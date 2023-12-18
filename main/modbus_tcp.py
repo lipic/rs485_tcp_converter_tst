@@ -35,7 +35,7 @@ class ModbusTCPServer:
     async def run(self) -> None:
         while True:
             self.client.process()
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(0.5)
 
     def set_dynamic_registers(self, data: dict) -> None:
         self.client.set_hreg(0, [data['U1']])
