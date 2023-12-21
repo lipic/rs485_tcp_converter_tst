@@ -14,15 +14,28 @@ LED_MQTT_GSM_ERR: int = 2
 TIME_SYNC_ERR: int = 4
 
 
+def set_global_exception():
+    def handle_exception(loop, context):
+        import sys
+        sys.print_exception(context["exception"])
+        sys.exit()
+
+    loop = asyncio.get_event_loop()
+    loop.set_exception_handler(handle_exception)
+
+
 class TaskHandler:
     def __init__(self, wifi):
         self.wdt: WDT = WDT(timeout=60000)
         self.setting: OrderedDict = Config()
-        self.web_server_app = web_server_app.WebServerApp(wifi=wifi, setting=self.setting, debug=int(self.setting.config['testing_software']))
+        self.web_server_app = web_server_app.WebServerApp(wifi=wifi, setting=self.setting,
+                                                          debug=int(self.setting.config['testing_software']))
         self.led_error_handler: LedHandler = LedHandler(21, 1, 2, 40)
         self.led_wifi_handler: LedHandler = LedHandler(22, 1, 2, 20)
-        self.modbus_tcp: ModbusTCPServer = ModbusTCPServer(debug=bool(self.setting.config['testing_software']))
-        self.modbus_rtu: ModbusRTUServer = ModbusRTUServer(baudrate=9600, debug=bool(self.setting.config['testing_software']))
+        self.modbus_tcp: ModbusTCPServer = ModbusTCPServer(wifi=wifi,
+                                                           debug=bool(self.setting.config['testing_software']))
+        self.modbus_rtu: ModbusRTUServer = ModbusRTUServer(baudrate=9600,
+                                                           debug=bool(self.setting.config['testing_software']))
         self.wifi_manager = wifi
         self.number_of_connection_attempts: int = 0
         self.wifi_manager.turnONAp()
@@ -82,6 +95,7 @@ class TaskHandler:
             await asyncio.sleep(1)
 
     def main_task_handler_run(self):
+        set_global_exception()
         loop = asyncio.get_event_loop()
         loop.create_task(self.wifi_handler())
         loop.create_task(self.system_handler())
@@ -89,6 +103,9 @@ class TaskHandler:
         loop.create_task(self.led_wifi())
         loop.create_task(self.web_server_app.web_server_run())
         loop.create_task(self.web_server_app.run_dns_server())
-        #loop.create_task(self.modbus_tcp.run())
-        #loop.create_task(self.modbus_rtu.run())
-        loop.run_forever()
+        loop.create_task(self.modbus_tcp.run())
+        loop.create_task(self.modbus_rtu.run())
+        try:
+            loop.run_forever()
+        finally:
+            asyncio.new_event_loop()

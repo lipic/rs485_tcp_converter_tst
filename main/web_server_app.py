@@ -5,8 +5,11 @@ from gc import collect, mem_free
 import uasyncio as asyncio
 import ulogging
 import usocket as socket
+from re import compile
 
 SERVER_IP = '192.168.4.1'
+# Helper to detect uasyncio v3
+IS_UASYNCIO_V3 = hasattr(asyncio, "__version__") and asyncio.__version__ >= (3,)
 
 class DNSQuery:
     def __init__(self, data):
@@ -32,7 +35,7 @@ class DNSQuery:
             packet += self.data[12:]  # Original Domain Name Question
             packet += b'\xC0\x0C'  # Pointer to domain name
             packet += b'\x00\x01\x00\x01\x00\x00\x00\x3C\x00\x04'  # Response type, ttl and resource data length -> 4 bytes
-            packet += bytes(map(int, ip.split('.'))) + b'\x00\x50'  # 4bytes of IP
+            packet += bytes(map(int, ip.split('.'))) #+ b'\x00\x50'  # 4bytes of IP
         return packet
 
 
@@ -60,7 +63,7 @@ class WebServerApp:
 
             ("/hotspot-detect.html", self.web_redirect),
             ("/success.html", self.web_redirect),
-            ("/generate_204", self.web_204),
+            (compile("^/generate_204"), self.web_204),
             ("/ncsi.txt", self.web_redirect),
             ("/check_network_status.txt", self.web_redirect),
 
@@ -81,9 +84,6 @@ class WebServerApp:
         target_url = 'http://' + target_ip + ':' + target_port
         header = {"Location": target_url}
         yield from picoweb.start_response(resp, status="302 Found", headers=header)
-        #yield from resp.awrite("Redirecting...")
-        #yield from picoweb.start_response(resp, status="204")
-        #yield from resp.awrite("")
 
     def web_ok(self, req, resp):
         yield from picoweb.start_response(resp, status="200")
@@ -178,7 +178,7 @@ class WebServerApp:
     async def web_server_run(self):
         try:
             self.logger.info("Webserver app started")
-            self.app.run(debug=False, host='0.0.0.0', port=self.port)
+            self.app.run(debug=False, host='192.168.4.1', port=self.port)
             while True:
                 await asyncio.sleep(100)
         except Exception as e:
@@ -188,16 +188,21 @@ class WebServerApp:
     async def run_dns_server(self):
         udps = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         udps.setblocking(False)
-        udps.bind(('0.0.0.0', 53))
+        udps.bind(('192.168.4.1', 53))
 
         while True:
             try:
                 collect()
+                if IS_UASYNCIO_V3:
+                    yield asyncio.core._io_queue.queue_read(udps)
+                else:
+                    yield asyncio.IORead(udps)
                 data, addr = udps.recvfrom(4096)
-                dns = DNSQuery(data)
-                udps.sendto(dns.response(SERVER_IP), addr)
-                await asyncio.sleep_ms(50)
+                DNS = DNSQuery(data)
+                udps.sendto(DNS.response(SERVER_IP), addr)
+                print("Replying: {:s} -> {:s}".format(DNS.domain, SERVER_IP))
+
             except Exception as e:
-                await asyncio.sleep_ms(1000)
+                await asyncio.sleep_ms(3000)
 
         udps.close()

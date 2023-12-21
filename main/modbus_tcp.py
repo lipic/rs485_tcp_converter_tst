@@ -7,16 +7,21 @@ from gc import collect
 
 class ModbusTCPServer:
 
-    def __init__(self, port: int = 502, ip: str = '0.0.0.0', debug: bool = False) -> None:
+    def __init__(self, wifi, port: int = 502, ip: str = '0.0.0.0', debug: bool = False) -> None:
         self.port = port
+        self.wifi = wifi
         self.ip = ip
         self.debug = debug
         self.server = None
 
         self.client = ModbusTCP()
         is_bound = self.client.get_bound_status()
-        if not is_bound:
-            self.client.bind(local_ip=ip, local_port=port)
+        try:
+            if not is_bound:
+                self.client.bind(local_ip=ip, local_port=port)
+        except:
+            from machine import reset
+            reset()
 
         collect()
         with open('main/registers.json', 'r') as file:
@@ -28,13 +33,11 @@ class ModbusTCPServer:
             self.logger.setLevel(ulogging.DEBUG)
         else:
             self.logger.setLevel(ulogging.INFO)
-        self.logger.info("**********************************************************")
-        self.logger.info("****** SET MODBUS TCP WITH PORT: {}; IP: {} *****".format(port, ip))
-        self.logger.info("**********************************************************")
 
     async def run(self) -> None:
         while True:
-            self.client.process()
+            if self.wifi.is_connected():
+                self.client.process()
             await asyncio.sleep(0.5)
 
     def set_dynamic_registers(self, data: dict) -> None:
