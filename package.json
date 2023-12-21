@@ -1,13 +1,13 @@
 {
   "urls": [
-    ["__config__.py", "github:lipic/rs485_tcp_converter/main/__config__.py"],
-    ["task_handler.py", "github:lipic/rs485_tcp_converter/main/task_handler.py"],
-    ["web_server_app.py", "github:lipic/rs485_tcp_converter/main/web_server_app.py"],
-    ["modbus_tcp.py", "github:lipic/rs485_tcp_converter/main/modbus_tcp.py"],
-    ["modbus_rtu.py", "github:lipic/rs485_tcp_converter/main/modbus_rtu.py"],
-    ["registers.json", "github:lipic/rs485_tcp_converter/main/registers.json"],
-    ["static/func.js", "github:lipic/rs485_tcp_converter/main/static/func.js"],
-    ["static/style.css", "github:lipic/rs485_tcp_converter/main/static/style.css"],
-    ["template/main_html.py", "github:lipic/rs485_tcp_converter/main/template/main_html.py"]
+    ["__config__.py", "github:lipic/rs485_tcp_converter_tst/main/__config__.py"],
+    ["task_handler.py", "github:lipic/rs485_tcp_converter_tst/main/task_handler.py"],
+    ["web_server_app.py", "github:lipic/rs485_tcp_converter_tst/main/web_server_app.py"],
+    ["modbus_tcp.py", "github:lipic/rs485_tcp_converter_tst/main/modbus_tcp.py"],
+    ["modbus_rtu.py", "github:lipic/rs485_tcp_converter_tst/main/modbus_rtu.py"],
+    ["registers.json", "github:lipic/rs485_tcp_converter_tst/main/registers.json"],
+    ["static/func.js", "github:lipic/rs485_tcp_converter_tst/main/static/func.js"],
+    ["static/style.css", "github:lipic/rs485_tcp_converter_tst/main/static/style.css"],
+    ["template/main_html.py", "github:lipic/rs485_tcp_converter_tst/main/template/main_html.py"]
   ]
 }
