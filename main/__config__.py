@@ -6,7 +6,6 @@ import os
 class Config:
 
     def __init__(self):
-        self.boot = bootloader.Bootloader('https://github.com/lipic/rs485_tcp_converter', "")
         self.setting_profiles: str = 'setting.dat'
         self.config = OrderedDict()
         self.config['reset']: str = '0'
@@ -19,8 +18,9 @@ class Config:
         self.config['wifi_status']: str = '0'
         self.config['inverter_type']: str = '0'
         self.loading_wifi: bool = False
-        self.handle_configure('actual_sw_version', self.boot.get_version(""))
         self.get_config()
+        self.boot = bootloader.Bootloader('https://github.com/lipic/rs485_tcp_converter', "") if self.config['testing_software'] == '1' else bootloader.Bootloader('https://github.com/lipic/rs485_tcp_converter_tst', "")
+        self.handle_configure('actual_sw_version', self.boot.get_version(""))
 
     def factory_reset(self) -> None:
         self.config = OrderedDict()
