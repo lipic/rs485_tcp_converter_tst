@@ -6,7 +6,7 @@ import os
 class Config:
 
     def __init__(self):
-        self.boot = bootloader.Bootloader('https://github.com/lipic/bcbox_tst', "")
+        self.boot = bootloader.Bootloader('https://github.com/lipic/rs485_tcp_converter', "")
         self.setting_profiles: str = 'setting.dat'
         self.config = OrderedDict()
         self.config['reset']: str = '0'
