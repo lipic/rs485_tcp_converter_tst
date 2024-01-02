@@ -30,7 +30,6 @@ class TaskHandler:
         self.setting: OrderedDict = Config()
         self.web_server_app = web_server_app.WebServerApp(wifi=wifi, setting=self.setting,
                                                           debug=int(self.setting.config['testing_software']))
-        self.led_error_handler: LedHandler = LedHandler(21, 1, 2, 40)
         self.led_wifi_handler: LedHandler = LedHandler(22, 1, 2, 20)
         self.modbus_tcp: ModbusTCPServer = ModbusTCPServer(wifi=wifi,
                                                            debug=bool(self.setting.config['testing_software']))
@@ -48,12 +47,6 @@ class TaskHandler:
     async def led_wifi(self):
         while True:
             await self.led_wifi_handler.led_handler()
-            await asyncio.sleep(0.1)
-            collect()
-
-    async def led_error(self):
-        while True:
-            await self.led_error_handler.led_handler()
             await asyncio.sleep(0.1)
             collect()
 
@@ -78,9 +71,7 @@ class TaskHandler:
                             self.number_of_connection_attempts = 0
                             await self.wifi_manager.get_connection()
                         self.number_of_connection_attempts = self.number_of_connection_attempts + 1
-                self.led_error_handler.remove_state(LED_WIFI_HANDLER_ERR)
             except Exception as e:
-                self.led_error_handler.add_state(LED_WIFI_HANDLER_ERR)
                 wifi_status = wifi_handler_error
                 self.logger.error("Wi-fi handler error: {}".format(e))
 
@@ -99,7 +90,6 @@ class TaskHandler:
         loop = asyncio.get_event_loop()
         loop.create_task(self.wifi_handler())
         loop.create_task(self.system_handler())
-        loop.create_task(self.led_error())
         loop.create_task(self.led_wifi())
         loop.create_task(self.web_server_app.web_server_run())
         loop.create_task(self.web_server_app.run_dns_server())

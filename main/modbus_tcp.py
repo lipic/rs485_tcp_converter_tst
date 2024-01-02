@@ -13,15 +13,16 @@ class ModbusTCPServer:
         self.ip = ip
         self.debug = debug
         self.server = None
-
-        self.client = ModbusTCP()
-        is_bound = self.client.get_bound_status()
         try:
+            self.client = ModbusTCP()
+            is_bound = self.client.get_bound_status()
             if not is_bound:
                 self.client.bind(local_ip=ip, local_port=port)
-        except:
-            from machine import reset
-            reset()
+        except OSError as e:
+            import errno
+            if e.args[0] == errno.EADDRINUSE:
+                from machine import reset
+                reset()
 
         collect()
         with open('main/registers.json', 'r') as file:
