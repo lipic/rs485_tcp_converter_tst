@@ -35,6 +35,14 @@
         "P3_HREGS": {
             "register": 8,
             "len": 1
+        },
+        "SOC_HREGS": {
+            "register": 9,
+            "len": 1
+        },
+        "SERIAL_HREGS": {
+            "register": 50,
+            "len": 12
         }
     }
 }

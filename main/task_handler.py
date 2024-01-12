@@ -33,8 +33,8 @@ class TaskHandler:
         self.led_wifi_handler: LedHandler = LedHandler(22, 1, 2, 20)
         self.modbus_tcp: ModbusTCPServer = ModbusTCPServer(wifi=wifi,
                                                            debug=bool(self.setting.config['testing_software']))
-        self.modbus_rtu: ModbusRTUServer = ModbusRTUServer(baudrate=9600,
-                                                           debug=bool(self.setting.config['testing_software']))
+        self.modbus_rtu: ModbusRTUServer = ModbusRTUServer(config=self.setting.config,
+                                                           modbus_tcp=self.modbus_tcp)
         self.wifi_manager = wifi
         self.number_of_connection_attempts: int = 0
         self.wifi_manager.turnONAp()
