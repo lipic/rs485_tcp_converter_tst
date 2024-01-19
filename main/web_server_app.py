@@ -7,7 +7,7 @@ import ulogging
 import usocket as socket
 from re import compile
 
-SERVER_IP = '192.168.4.1'
+SERVER_IP = '8.8.8.8'
 # Helper to detect uasyncio v3
 IS_UASYNCIO_V3 = hasattr(asyncio, "__version__") and asyncio.__version__ >= (3,)
 
@@ -66,7 +66,6 @@ class WebServerApp:
             (compile("^/generate_204"), self.web_204),
             ("/ncsi.txt", self.web_redirect),
             ("/check_network_status.txt", self.web_redirect),
-
             ("/connecttest.txt", self.web_redirect_win11),
             ("/wpad.dat", self.web_not_found),
             ("/redirect", self.web_redirect),
@@ -78,15 +77,16 @@ class WebServerApp:
 
     def web_not_found(self, req, resp):
         yield from picoweb.start_response(resp, status="404")
+
     def web_204(self, req, resp):
-        target_ip = '192.168.4.1'
         target_port = '80'
-        target_url = 'http://' + target_ip + ':' + target_port
+        target_url = 'http://' + SERVER_IP + ':' + target_port
         header = {"Location": target_url}
         yield from picoweb.start_response(resp, status="302 Found", headers=header)
 
     def web_ok(self, req, resp):
         yield from picoweb.start_response(resp, status="200")
+
     def web_redirect_win11(self, req, resp):
         self.setting.loading_wifi = True
         headers = {"Location": "http://logout.net"}
@@ -94,9 +94,8 @@ class WebServerApp:
 
     def web_redirect(self, req, resp):
         self.setting.loading_wifi = True
-        target_ip = '192.168.4.1'
         target_port = '80'
-        target_url = 'http://' + target_ip + ':' + target_port
+        target_url = 'http://' + SERVER_IP + ':' + target_port
         headers = {"Location": target_url}
         yield from picoweb.start_response(resp, status="302", headers=headers)
         yield from resp.awrite("Success")
@@ -178,7 +177,7 @@ class WebServerApp:
     async def web_server_run(self):
         try:
             self.logger.info("Webserver app started")
-            self.app.run(debug=False, host='192.168.4.1', port=self.port)
+            self.app.run(debug=False, host=SERVER_IP, port=self.port)
             while True:
                 await asyncio.sleep(100)
         except Exception as e:
@@ -188,7 +187,7 @@ class WebServerApp:
     async def run_dns_server(self):
         udps = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         udps.setblocking(False)
-        udps.bind(('192.168.4.1', 53))
+        udps.bind((SERVER_IP, 53))
 
         while True:
             try:
