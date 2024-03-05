@@ -29,7 +29,7 @@ class ModbusTCPServer:
             register_definitions = json.load(file)
         collect()
         self.client.setup_registers(registers=register_definitions, use_default_vals=True)
-        self.set_static_registers()
+        self.set_dynamic_registers(data={})
 
         self.logger = ulogging.getLogger(__name__)
         if debug:
@@ -47,21 +47,27 @@ class ModbusTCPServer:
             await asyncio.sleep(0.5)
 
     def set_dynamic_registers(self, data: dict) -> None:
-        self.client.set_hreg(0, [data['U1']])  # [V]
-        self.client.set_hreg(1, [data['U2']])  # [V]
-        self.client.set_hreg(2, [data['U3']])  # [V]
-        self.client.set_hreg(3, [data['I1']])  # [A*0.01]
-        self.client.set_hreg(4, [data['I2']])  # [A*0.01]
-        self.client.set_hreg(5, [data['I3']])  # [A*0.01]
-        self.client.set_hreg(6, [data['P1']])  # [W]
-        self.client.set_hreg(7, [data['P2']])  # [W]
-        self.client.set_hreg(8, [data['P3']])  # [W]
-        self.client.set_hreg(9, [data['SOC']])  # [%]
-        self.client.set_hreg(10, [data['TYPE']])
+        self.client.set_hreg(0, [data.get('U1', 0)])
+        self.client.set_hreg(1, [data.get('U2', 0)])  
+        self.client.set_hreg(2, [data.get('U3', 0)])  
+        self.client.set_hreg(3, [data.get('I1', 0)])  
+        self.client.set_hreg(4, [data.get('I2', 0)])  
+        self.client.set_hreg(5, [data.get('I3', 0)])  
+        self.client.set_hreg(6, [data.get('P1', 0)])  
+        self.client.set_hreg(7, [data.get('P2', 0)])  
+        self.client.set_hreg(8, [data.get('P3', 0)])  
+        self.client.set_hreg(9, [data.get('SOC', 0)])
 
     def set_static_registers(self, inverter_type: int = 1) -> None:
-        #  -SOFAR-ID
         if inverter_type == 1:
-            data = [ord(char) for char in "-SOFAR-123654-"]
-            # data.extend([5, 48, 54, 53, 52, 45])
+            data = [ord(char) for char in "-SOFAR-RS485-"]
+            self.client.set_hreg(50, data)
+        elif inverter_type == 2:
+            data = [ord(char) for char in "-RCT-RS485-"]
+            self.client.set_hreg(50, data)
+        elif inverter_type == 3:
+            data = [ord(char) for char in "-SUNWAYS-RS485-"]
+            self.client.set_hreg(50, data)
+        elif inverter_type == 4:
+            data = [ord(char) for char in "-DEYE-RS485-"]
             self.client.set_hreg(50, data)

@@ -176,7 +176,7 @@ class WebServerApp:
 
     async def web_server_run(self):
         try:
-            self.logger.info("Webserver app started")
+            self.logger.info(f"Webserver app started on IP: {SERVER_IP}, PORT: {self.port}")
             self.app.run(debug=False, host=SERVER_IP, port=self.port)
             while True:
                 await asyncio.sleep(100)
