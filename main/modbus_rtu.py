@@ -66,6 +66,7 @@ wattsonic_addr: dict = {
 class ModbusRTUServer:
 
     def __init__(self, config, modbus_tcp, debug=False) -> None:
+        self.inverters: list = ['SOFAR', 'RCT', 'SUNWAY', 'DEYE', 'WATTSONIC']
         self.debug = debug
         self.config = config
         self.modbus_tcp = modbus_tcp
@@ -82,7 +83,8 @@ class ModbusRTUServer:
             self.logger.setLevel(ulogging.DEBUG)
         else:
             self.logger.setLevel(ulogging.INFO)
-        self.logger.info(f"INVERTER: {self.config['inverter_type']}")
+        self.logger.info(f" Supported inverters => {', '.join(self.inverters)}")
+        self.logger.info(f" Selected inverter => {self.inverters[int(self.config['inverter_type']) - 1]}")
 
     async def run(self) -> None:
         konst: int = 1
@@ -130,7 +132,10 @@ class ModbusRTUServer:
 
             except Exception as e:
                 self.rs485_led.off()
-                self.logger.error(e)
+                if 0 <= int(self.config['inverter_type'])-1 <= len(self.inverters):
+                    self.logger.error(f" {self.inverters[int(self.config['inverter_type']) -1 ]} => {e}")
+                else:
+                    self.logger.error(e)
 
             collect()
             await asyncio.sleep(1)
