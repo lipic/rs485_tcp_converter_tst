@@ -40,7 +40,26 @@ sunway_addr: dict = {
 }
 
 deye_addr: dict = {
+    598: ("U1", 0.1, 1),  # V
+    599: ("U2", 0.1, 1),  # V
+    600: ("U3", 0.1, 1),  # V
+    604: ("P1", 1, 1),  # kW
+    605: ("P2", 1, 1),  # kW
+    606: ("P3", 1, 1),  # kW
+    610: ("I1", 1, 1),  # A
+    611: ("I2", 1, 1),  # A
+    612: ("I3", 1, 1),  # A
+    214: ("SOC", 1, 1),  # %
+}
+
+wattsonic_addr: dict = {
     11009: ("U1", 0.1, 1),  # V
+    11011: ("U2", 0.1, 1),  # V
+    11013: ("U3", 0.1, 1),  # V
+    10994: ("P1", 1, 2),  # W
+    10996: ("P2", 1, 2),  # W
+    10998: ("P3", 1, 2),  # W
+    33000: ("SOC", 0.01, 1),  # %
 }
 
 
@@ -79,7 +98,10 @@ class ModbusRTUServer:
                     konst = 100
                     addr_dict = sunway_addr
                 elif self.config['inverter_type'] == '4':
-                    addr_dict = dey_addr
+                    addr_dict = deye_addr
+                elif self.config['inverter_type'] == '5':
+                    konst = 100
+                    addr_dict = wattsonic_addr
                 else:
                     self.logger.debug("unknown inverter")
                     raise ValueError("unknown inverter")
@@ -102,7 +124,7 @@ class ModbusRTUServer:
                 for i in range(1, 4):
                     if f'P{i}' not in keys:
                         data[f'P{i}'] = int((data[f'I{i}'] * konst) * data[f'U{i}'])
-                print(data)
+
                 self.rs485_led.on()
                 self.modbus_tcp.set_dynamic_registers(data=data)
 

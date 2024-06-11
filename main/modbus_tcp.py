@@ -71,3 +71,6 @@ class ModbusTCPServer:
         elif inverter_type == 4:
             data = [ord(char) for char in "-DEYE-RS485-"]
             self.client.set_hreg(50, data)
+        elif inverter_type == 5:
+            data = [ord(char) for char in "-WATTSONIC-RS485-"]
+            self.client.set_hreg(50, data)
