@@ -85,6 +85,7 @@ class ModbusRTUServer:
             self.logger.setLevel(ulogging.INFO)
         self.logger.info(f" Supported inverters => {', '.join(self.inverters)}")
         self.logger.info(f" Selected inverter => {self.inverters[int(self.config['inverter_type']) - 1]}")
+        self.modbus_id: int = 1
 
     async def run(self) -> None:
         konst: int = 1
@@ -104,6 +105,7 @@ class ModbusRTUServer:
                 elif self.config['inverter_type'] == '5':
                     konst = 100
                     addr_dict = wattsonic_addr
+                    self.modbus_id = 247
                 else:
                     self.logger.debug("unknown inverter")
                     raise ValueError("unknown inverter")
@@ -111,7 +113,7 @@ class ModbusRTUServer:
                 print("=====================================")
                 keys: list = [value[0] for value in addr_dict.values()]
                 for address, (name, multiplier, length) in addr_dict.items():
-                    val = self.host.read_holding_registers(slave_addr=1, starting_addr=address, register_qty=length)
+                    val = self.host.read_holding_registers(slave_addr=self.modbus_id, starting_addr=address, register_qty=length)
                     if length > 1:
                         val = val[0] << 16 | val[1] & 0xFFFF
                     else:
@@ -126,7 +128,6 @@ class ModbusRTUServer:
                 for i in range(1, 4):
                     if f'P{i}' not in keys:
                         data[f'P{i}'] = int((data[f'I{i}'] * konst) * data[f'U{i}'])
-
                 self.rs485_led.on()
                 self.modbus_tcp.set_dynamic_registers(data=data)
 
