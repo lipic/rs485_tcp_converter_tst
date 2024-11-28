@@ -110,7 +110,7 @@ class ModbusRTUServer:
                     self.logger.debug("unknown inverter")
                     raise ValueError("unknown inverter")
 
-                print("=====================================")
+                self.logger.debug("=====================================")
                 keys: list = [value[0] for value in addr_dict.values()]
                 for address, (name, multiplier, length) in addr_dict.items():
                     val = self.host.read_holding_registers(slave_addr=self.modbus_id, starting_addr=address, register_qty=length)
@@ -128,6 +128,8 @@ class ModbusRTUServer:
                 for i in range(1, 4):
                     if f'P{i}' not in keys:
                         data[f'P{i}'] = int((data[f'I{i}'] * konst) * data[f'U{i}'])
+
+                self.logger.debug(data)
                 self.rs485_led.on()
                 self.modbus_tcp.set_dynamic_registers(data=data)
 
