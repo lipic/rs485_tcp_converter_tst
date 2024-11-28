@@ -110,7 +110,6 @@ class ModbusRTUServer:
                     self.logger.debug("unknown inverter")
                     raise ValueError("unknown inverter")
 
-                self.logger.debug("=====================================")
                 keys: list = [value[0] for value in addr_dict.values()]
                 for address, (name, multiplier, length) in addr_dict.items():
                     val = self.host.read_holding_registers(slave_addr=self.modbus_id, starting_addr=address, register_qty=length)

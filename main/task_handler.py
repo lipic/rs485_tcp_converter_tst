@@ -28,13 +28,15 @@ class TaskHandler:
     def __init__(self, wifi):
         self.wdt: WDT = WDT(timeout=60000)
         self.setting: OrderedDict = Config()
-        self.web_server_app = web_server_app.WebServerApp(wifi=wifi, setting=self.setting,
-                                                          debug=int(self.setting.config['testing_software']))
+        self.web_server_app = web_server_app.WebServerApp(wifi=wifi,
+                                                          setting=self.setting,
+                                                          debug=bool(self.setting.config['testing_software']))
         self.led_wifi_handler: LedHandler = LedHandler(22, 1, 2, 20)
         self.modbus_tcp: ModbusTCPServer = ModbusTCPServer(wifi=wifi,
                                                            debug=bool(self.setting.config['testing_software']))
         self.modbus_rtu: ModbusRTUServer = ModbusRTUServer(config=self.setting.config,
-                                                           modbus_tcp=self.modbus_tcp)
+                                                           modbus_tcp=self.modbus_tcp,
+                                                           debug=bool(self.setting.config['testing_software']))
         self.wifi_manager = wifi
         self.number_of_connection_attempts: int = 0
         self.wifi_manager.turnONAp()
